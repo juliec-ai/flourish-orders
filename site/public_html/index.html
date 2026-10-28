@@ -44,10 +44,10 @@
             <details id="cust-new">
               <summary>New customer</summary>
               <div class="row">
-                <label>Name <input name="c_name"></label>
-                <label>Phone <input name="c_phone" type="tel"></label>
+                <label>Full name (first and last) <input name="c_name" autocomplete="off" placeholder="Jane Smith"></label>
+                <label>Phone (required) <input name="c_phone" type="tel" inputmode="tel" placeholder="435-555-1234"></label>
               </div>
-              <label>Email <input name="c_email" type="email"></label>
+              <label>Email (optional) <input name="c_email" type="email" placeholder="jane@example.com"></label>
               <label>Street address <input name="c_address"></label>
               <div class="row three">
                 <label>City <input name="c_city"></label>
@@ -91,8 +91,8 @@
           <h2>Recipient</h2>
           <label><input type="checkbox" id="same-as-customer"> Same as customer</label>
           <div class="row">
-            <label>Name <input name="r_name"></label>
-            <label>Phone <input name="r_phone" type="tel"></label>
+            <label>Recipient full name <input name="r_name" placeholder="Who the flowers are for"></label>
+            <label>Recipient phone <input name="r_phone" type="tel" inputmode="tel" placeholder="435-555-1234"></label>
           </div>
           <label>Delivery address <input name="r_address" placeholder="Street, city"></label>
           <label>Card message <textarea name="cardMessage" rows="3"></textarea></label>

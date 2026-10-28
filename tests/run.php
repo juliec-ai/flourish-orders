@@ -44,6 +44,15 @@ check('due time is sent to Infinity in UTC', Orders::dueDateValue('2026-10-30', 
 check('due date without time stays a date', Orders::dueDateValue('2026-10-30', '', 'America/Denver') === '2026-10-30');
 check('due label shows shop time', Orders::dueLabel('2026-10-30T20:30:00.000000Z', 'America/Denver') === 'Fri, Oct 30, 2:30 PM');
 check('due label for a date with no time', Orders::dueLabel('2026-10-30T00:00:00.000000Z', 'America/Denver') === 'Fri, Oct 30');
+check('new customer needs a real phone', throws(fn() => Orders::validate([
+    'customer' => ['name' => 'Julieanne', 'phone' => 'Chambers'], 'lines' => [['name' => 'Roses', 'qty' => 1, 'price' => 5]],
+    'fulfillment' => 'Pickup', 'dueDate' => '2026-10-28',
+]), "/phone number doesn't look right/"));
+check('new customer phone is required', throws(fn() => Orders::validate([
+    'customer' => ['name' => 'Julieanne Chambers'], 'lines' => [['name' => 'Roses', 'qty' => 1, 'price' => 5]],
+    'fulfillment' => 'Pickup', 'dueDate' => '2026-10-28',
+]), "/Add the customer's phone/"));
+check('phones are tidied', Orders::phone('(435) 723 3449') === '435-723-3449' && Orders::phone('+1 435.723.3449') === '435-723-3449');
 
 $store = new Store(sys_get_temp_dir() . '/fo-test-' . getmypid());
 $auth = new Auth(str_repeat('s', 32), [], $store);

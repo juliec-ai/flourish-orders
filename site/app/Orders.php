@@ -51,12 +51,36 @@ final class Orders
         ));
     }
 
+    // 10-digit US numbers become 435-723-3449; anything else is returned as typed.
+    public static function phone(?string $raw): string
+    {
+        $raw = trim((string) $raw);
+        $digits = preg_replace('/\D/', '', $raw);
+        if (strlen($digits) === 11 && $digits[0] === '1') $digits = substr($digits, 1);
+        return strlen($digits) === 10 ? substr($digits, 0, 3) . '-' . substr($digits, 3, 3) . '-' . substr($digits, 6) : $raw;
+    }
+
+    private static function phoneOk(string $raw): bool
+    {
+        return strlen(preg_replace('/\D/', '', $raw)) >= 10 && !preg_match('/[a-z]/i', $raw);
+    }
+
     // Checks the order sent by the browser and returns clean lines, or throws with a message for staff.
     public static function validate(array $o): array
     {
         $errors = [];
         $c = $o['customer'] ?? null;
-        if (!is_array($c) || (empty($c['id']) && trim((string) ($c['name'] ?? '')) === '')) $errors[] = 'Choose or add a customer.';
+        if (!is_array($c) || (empty($c['id']) && trim((string) ($c['name'] ?? '')) === '')) {
+            $errors[] = 'Choose or add a customer.';
+        } elseif (empty($c['id'])) {
+            $phone = trim((string) ($c['phone'] ?? ''));
+            $email = trim((string) ($c['email'] ?? ''));
+            if ($phone === '') $errors[] = "Add the customer's phone number.";
+            elseif (!self::phoneOk($phone)) $errors[] = "The customer's phone number doesn't look right (it needs 10 digits).";
+            if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "The customer's email doesn't look right.";
+        }
+        $rPhone = trim((string) ($o['recipient']['phone'] ?? ''));
+        if ($rPhone !== '' && !self::phoneOk($rPhone)) $errors[] = "The recipient's phone number doesn't look right (it needs 10 digits).";
         $lines = [];
         foreach ((array) ($o['lines'] ?? []) as $l) {
             $name = trim((string) ($l['name'] ?? ''));
@@ -116,7 +140,7 @@ final class Orders
             'Order Number' => $number,
             'Customer' => $customerId,
             'Recipient Name' => $recipientName,
-            'Recipient Phone' => trim((string) ($r['phone'] ?? '')),
+            'Recipient Phone' => self::phone($r['phone'] ?? ''),
             'Recipient Address' => trim((string) ($r['address'] ?? '')),
             'Products' => array_values(array_unique(array_filter(array_column($lines, 'productId')))),
             'Line Items' => self::lineItemsText($lines),
@@ -142,7 +166,7 @@ final class Orders
     {
         $f = fn($k) => trim((string) ($c[$k] ?? ''));
         return [
-            'Name' => $f('name'), 'Phone' => $f('phone'), 'Email' => $f('email'), 'Address' => $f('address'),
+            'Name' => $f('name'), 'Phone' => self::phone($c['phone'] ?? ''), 'Email' => $f('email'), 'Address' => $f('address'),
             'City' => $f('city'), 'State' => $f('state'), 'ZIP' => $f('zip'), 'Source' => $source,
         ];
     }
