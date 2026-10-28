@@ -1,0 +1,23 @@
+{
+  "name": "flourish-orders",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Staff order-entry dashboard for Brigham Floral / Flourish, backed by Infinity",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch --env-file=.env server/index.js",
+    "hash-pin": "node scripts/hash-pin.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/juliec-ai/flourish-orders.git"
+  },
+  "dependencies": {
+    "express": "^4.22.3"
+  }
+}

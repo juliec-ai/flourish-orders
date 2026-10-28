@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shop Orders</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">Shop Orders</div>
+    <nav id="nav" hidden>
+      <button class="tab active" data-view="new">New order</button>
+      <button class="tab" data-view="list">Orders</button>
+      <span id="who" class="who"></span>
+      <button id="logout" class="link">Sign out</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Sign in -->
+    <section id="view-login" class="card narrow" hidden>
+      <h1>Staff sign in</h1>
+      <form id="login-form">
+        <label>Email <input name="email" type="email" autocomplete="username" required></label>
+        <label>PIN <input name="pin" type="password" inputmode="numeric" pattern="\d{4,8}" autocomplete="current-password" required></label>
+        <p class="error" id="login-error"></p>
+        <button class="primary" type="submit">Sign in</button>
+      </form>
+    </section>
+
+    <!-- New order -->
+    <section id="view-new" hidden>
+      <form id="order-form" class="grid">
+        <div class="card">
+          <h2>Customer</h2>
+          <div id="customer-chosen" class="chosen" hidden>
+            <div><strong id="cust-name"></strong><div class="muted" id="cust-detail"></div></div>
+            <button type="button" class="link" id="cust-clear">Change</button>
+          </div>
+          <div id="customer-pick">
+            <label>Find by name, phone or email <input id="cust-search" autocomplete="off" placeholder="Start typing..."></label>
+            <ul id="cust-results" class="results"></ul>
+            <details id="cust-new">
+              <summary>New customer</summary>
+              <div class="row">
+                <label>Name <input name="c_name"></label>
+                <label>Phone <input name="c_phone" type="tel"></label>
+              </div>
+              <label>Email <input name="c_email" type="email"></label>
+              <label>Street address <input name="c_address"></label>
+              <div class="row three">
+                <label>City <input name="c_city"></label>
+                <label>State <input name="c_state" value="UT"></label>
+                <label>ZIP <input name="c_zip"></label>
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Order</h2>
+          <div class="row">
+            <label>Came in by <select name="channel" id="opt-channel"></select></label>
+            <label>Brand <select name="brand" id="opt-brand"></select></label>
+          </div>
+          <div class="row">
+            <label>Going out by <select name="fulfillment" id="opt-fulfillment" required></select></label>
+            <label>Occasion <select name="occasion" id="opt-occasion"><option value="">Choose...</option></select></label>
+          </div>
+          <div class="row">
+            <label>Due date <input name="dueDate" type="date" required></label>
+            <label>Time <input name="dueTime" type="time"></label>
+          </div>
+        </div>
+
+        <div class="card wide">
+          <h2>Items</h2>
+          <div class="row add-item">
+            <label class="grow">Product <input id="product-search" list="product-list" placeholder="Pick a product or type a custom item"></label>
+            <button type="button" id="add-item">Add</button>
+          </div>
+          <datalist id="product-list"></datalist>
+          <table class="lines">
+            <thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Tax</th><th></th></tr></thead>
+            <tbody id="lines"></tbody>
+          </table>
+        </div>
+
+        <div class="card" id="recipient-card">
+          <h2>Recipient</h2>
+          <label><input type="checkbox" id="same-as-customer"> Same as customer</label>
+          <div class="row">
+            <label>Name <input name="r_name"></label>
+            <label>Phone <input name="r_phone" type="tel"></label>
+          </div>
+          <label>Delivery address <input name="r_address" placeholder="Street, city"></label>
+          <label>Card message <textarea name="cardMessage" rows="3"></textarea></label>
+        </div>
+
+        <div class="card">
+          <h2>Payment</h2>
+          <div class="row">
+            <label>Payment <select name="paymentStatus" id="opt-paymentStatus"></select></label>
+            <label>Stripe payment ID <input name="stripePaymentId" placeholder="pi_... (optional)"></label>
+          </div>
+          <label id="fee-row">Delivery fee <input name="deliveryFee" type="number" step="0.01" min="0"></label>
+          <label>Notes for the designer <textarea name="notes" rows="2"></textarea></label>
+          <dl class="totals">
+            <dt>Subtotal</dt><dd id="t-sub">$0.00</dd>
+            <dt>Delivery</dt><dd id="t-fee">$0.00</dd>
+            <dt>Tax</dt><dd id="t-tax">$0.00</dd>
+            <dt class="big">Total</dt><dd class="big" id="t-total">$0.00</dd>
+          </dl>
+          <p class="error" id="order-error"></p>
+          <button class="primary" type="submit" id="save-order">Save order</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Orders list -->
+    <section id="view-list" hidden>
+      <div class="list-head">
+        <h1>Open orders</h1>
+        <label class="inline"><input type="checkbox" id="show-done"> Show finished</label>
+        <button id="refresh" class="link">Refresh</button>
+      </div>
+      <div id="orders" class="orders"></div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" hidden></div>
+  <script src="/app.js"></script>
+</body>
+</html>
