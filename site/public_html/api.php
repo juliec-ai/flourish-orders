@@ -15,10 +15,12 @@ try {
     [$status, $out] = [$e->status(), ['error' => $e->getMessage()]];
 } catch (InfinityError $e) {
     error_log($e->getMessage());
-    [$status, $out] = [502, ['error' => 'Could not reach Infinity. Try again in a moment.']];
+    // Infinity's own message (never the token) helps staff and Claude see what went wrong.
+    $detail = preg_replace('/\s+/', ' ', mb_substr($e->getMessage(), 0, 400));
+    [$status, $out] = [502, ['error' => "Problem talking to Infinity: $detail"]];
 } catch (Throwable $e) {
     error_log((string) $e);
-    [$status, $out] = [500, ['error' => 'Something went wrong on the server.']];
+    [$status, $out] = [500, ['error' => 'Something went wrong on the server: ' . mb_substr($e->getMessage(), 0, 300)]];
 }
 
 http_response_code($status);
