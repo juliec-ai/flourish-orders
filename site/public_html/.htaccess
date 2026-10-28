@@ -1,0 +1,15 @@
+DirectoryIndex index.html
+Options -Indexes
+
+RewriteEngine On
+RewriteRule ^api(/.*)?$ api.php [L,QSA]
+
+# Hide dotfiles
+RewriteRule (^|/)\. - [F]
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "same-origin"
+  Header always set Strict-Transport-Security "max-age=31536000"
+  Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data: https:; frame-ancestors 'self' https://*.jadesites.com https://brighamfloral.com https://*.brighamfloral.com"
+</IfModule>
