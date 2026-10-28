@@ -112,15 +112,26 @@ final class Api
 
     private function orders(bool $showDone): array
     {
+        $customers = [];
+        foreach ($this->all('customers') as $c) $customers[$c['id']] = $c;
         $list = [];
         foreach ($this->all('orders') as $o) {
             $status = $o['Status'][0] ?? '';
+            $cust = $customers[((array) ($o['Customer'] ?? []))[0] ?? ''] ?? [];
             if (!$showDone && in_array($status, self::DONE, true)) continue;
             $list[] = [
                 'id' => $o['id'],
                 'number' => $o['Order Number'] ?? '',
                 'name' => $o['Name'] ?? '',
+                'customerName' => $cust['Name'] ?? '',
+                'customerPhone' => $cust['Phone'] ?? '',
                 'recipient' => $o['Recipient Name'] ?? '',
+                'recipientPhone' => $o['Recipient Phone'] ?? '',
+                'occasion' => $o['Occasion'][0] ?? '',
+                'channel' => $o['Channel'][0] ?? '',
+                'subtotal' => (float) ($o['Subtotal'] ?? 0),
+                'deliveryFee' => (float) ($o['Delivery Fee'] ?? 0),
+                'tax' => (float) ($o['Tax'] ?? 0),
                 'address' => $o['Recipient Address'] ?? '',
                 'due' => $o['Due Date'] ?? '',
                 'dueLabel' => Orders::dueLabel($o['Due Date'] ?? null, $this->config['timezone']),

@@ -260,6 +260,34 @@
     $$('#orders .order').forEach((el) => { el.hidden = goFilter !== '' && el.dataset.fulfillment !== goFilter; });
   }
 
+  // Work ticket for the designer and driver, printed on plain letter paper.
+  function printTicket(o) {
+    const row = (label, value) => (value ? `<tr><th>${label}</th><td>${esc(value)}</td></tr>` : '');
+    $('#print-area').innerHTML = `
+      <div class="ticket">
+        <header>
+          <div><div class="t-go">${esc(o.fulfillment || '')}</div><h1>Order ${esc(o.number)}</h1></div>
+          <div class="t-due"><div>Due</div><strong>${esc(o.dueLabel || 'No due date')}</strong></div>
+        </header>
+        <table>
+          ${row('Customer', [o.customerName, o.customerPhone].filter(Boolean).join(' · '))}
+          ${row('Recipient', [o.recipient, o.recipientPhone].filter(Boolean).join(' · '))}
+          ${row('Deliver to', o.fulfillment === 'Delivery' ? o.address : '')}
+          ${row('Occasion', o.occasion)}
+          ${row('Brand', o.brand)}
+          ${row('Came in by', o.channel)}
+          ${row('Payment', `${o.paymentStatus} · ${fmt(o.total)}`)}
+        </table>
+        <h2>Items</h2>
+        <pre>${esc(o.lineItems)}</pre>
+        ${o.notes ? `<h2>Notes</h2><pre>${esc(o.notes)}</pre>` : ''}
+        <h2>Card message</h2>
+        <div class="t-card">${esc(o.cardMessage) || '<em>No card message</em>'}</div>
+        <div class="t-sign"><span>Designed by ________</span><span>Checked ________</span>${o.fulfillment === 'Delivery' ? '<span>Delivered ________</span>' : '<span>Picked up ________</span>'}</div>
+      </div>`;
+    window.print();
+  }
+
   async function loadOrders() {
     const box = $('#orders');
     box.innerHTML = '<p class="muted">Loading...</p>';
@@ -280,10 +308,14 @@
             <select data-k="status" aria-label="Status">${state.options.status.map((s) => `<option ${s === o.status ? 'selected' : ''}>${esc(s)}</option>`).join('')}</select>
             <select data-k="paymentStatus" aria-label="Payment">${state.options.paymentStatus.map((s) => `<option ${s === o.paymentStatus ? 'selected' : ''}>${esc(s)}</option>`).join('')}</select>
             <strong>${fmt(o.total)}</strong>
+            <button type="button" class="print-btn">Print ticket</button>
           </div>
         </article>`).join('');
       renderFilter();
       applyFilter();
+      $$('#orders .print-btn').forEach((b) => b.addEventListener('click', () => {
+        printTicket(list.find((o) => o.id === b.closest('.order').dataset.id));
+      }));
       $$('#orders select').forEach((sel) => sel.addEventListener('change', async () => {
         const id = sel.closest('.order').dataset.id;
         try {
