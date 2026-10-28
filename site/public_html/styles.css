@@ -102,7 +102,7 @@ details summary { cursor: pointer; color: var(--green-2); margin: .25rem 0 .6rem
   .card-strip { height: var(--card-h); display: grid; grid-template-columns: repeat(3, 1fr); }
   .panel { padding: .3in .25in .2in; text-align: center; display: flex; flex-direction: column; gap: 2pt; overflow: hidden; }
   .p-brand { font-family: Georgia, "Times New Roman", serif; font-size: 15pt; margin-bottom: 10pt; }
-  .p-brand img { max-width: 2in; max-height: .6in; object-fit: contain; }
+  .p-brand img { max-width: 2.2in; max-height: .95in; object-fit: contain; }
   .p-to { font-size: 11pt; }
   .p-when { margin-top: 6pt; }
   .p-shop { font-size: 8.5pt; }
