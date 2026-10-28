@@ -270,23 +270,28 @@
     const takenBy = (String(o.notes || '').match(/^Taken by: (.*)$/m) || [])[1] || '';
     const msg = o.cardMessage || '';
     const msgSize = msg.length > 220 ? 'sm' : msg.length > 110 ? 'md' : 'lg';
+    // Logo files live in public_html/logos, one per brand; the brand name prints if a logo is missing.
+    const logoFile = { 'Brigham Floral and Gift': 'brigham-floral', Flourish: 'flourish', 'David Isaac': 'david-isaac' }[brand];
+    const logo = () => (logoFile
+      ? `<div class="p-brand"><img src="/logos/${logoFile}.png" alt="${esc(brand)}" onerror="this.replaceWith(document.createTextNode(this.alt))"></div>`
+      : `<div class="p-brand">${esc(brand)}</div>`);
     const addr = (lines) => lines.filter(Boolean).map((l) => `<div>${esc(l)}</div>`).join('');
     const row = (label, value) => (value ? `<tr><th>${label}</th><td>${esc(value)}</td></tr>` : '');
     $('#print-area').innerHTML = `
       <div class="sheet">
         <section class="card-strip">
           <div class="panel p-to">
-            <div class="p-brand">${esc(brand)}</div>
+            ${logo()}
             ${addr([o.recipient, delivery ? o.address : '', o.recipientPhone ? `Phone: ${o.recipientPhone}` : ''])}
             <div class="p-when">${delivery ? 'Delivery' : esc(o.fulfillment || 'Due')}: <strong>${esc(o.dueLabel || '')}</strong></div>
           </div>
           <div class="panel p-shop">
-            <div class="p-brand">${esc(brand)}</div>
+            ${logo()}
             ${addr([shop.address, shop.phone ? `Phone: ${shop.phone}` : '', shop.email, shop.web])}
             <p class="p-care">Dear Valued Customer,<br>${esc(shop.care || '')}</p>
           </div>
           <div class="panel p-msg">
-            <div class="p-brand">${esc(brand)}</div>
+            ${logo()}
             <div class="p-text ${msgSize}">${esc(msg)}</div>
           </div>
         </section>
@@ -322,7 +327,10 @@
           </div>
         </section>
       </div>`;
-    window.print();
+    // Print once the logos have loaded (or failed), so they aren't left blank.
+    const imgs = $$('#print-area img');
+    Promise.all(imgs.map((i) => (i.complete ? null : new Promise((r) => { i.onload = r; i.addEventListener('error', r); }))))
+      .then(() => window.print());
   }
 
   async function loadOrders() {
