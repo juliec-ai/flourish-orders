@@ -247,14 +247,6 @@
   });
 
   // ---------- order list ----------
-  function dueText(due) {
-    if (!due) return 'No due date';
-    const d = new Date(String(due).replace(' ', 'T'));
-    if (isNaN(d)) return due;
-    const hasTime = /\d{2}:\d{2}/.test(due);
-    return d.toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', ...(hasTime ? { hour: 'numeric', minute: '2-digit' } : {}) });
-  }
-
   async function loadOrders() {
     const box = $('#orders');
     box.innerHTML = '<p class="muted">Loading...</p>';
@@ -265,7 +257,7 @@
         <article class="order" data-id="${esc(o.id)}">
           <div>
             <h3>${esc(o.name || o.number)}</h3>
-            <div class="muted">${esc(dueText(o.due))} · ${esc(o.fulfillment)}${o.address ? ` · ${esc(o.address)}` : ''}</div>
+            <div class="muted">${esc(o.dueLabel || 'No due date')} · ${esc(o.fulfillment)}${o.address ? ` · ${esc(o.address)}` : ''}</div>
             <div><span class="pill">${esc(o.brand)}</span><span class="pill ${o.paymentStatus === 'Unpaid' ? 'unpaid' : ''}">${esc(o.paymentStatus)}</span></div>
             <pre>${esc(o.lineItems)}</pre>
             ${o.cardMessage ? `<div class="muted">Card: “${esc(o.cardMessage)}”</div>` : ''}

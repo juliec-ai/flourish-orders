@@ -40,7 +40,10 @@ check('validation cleans lines', Orders::validate([
     'fulfillment' => 'Pickup', 'dueDate' => '2026-10-28',
 ]) === [['productId' => null, 'name' => 'Roses', 'qty' => 2.0, 'price' => 5.0, 'taxable' => true]]);
 check('line items read well', Orders::lineItemsText([['qty' => 2.0, 'name' => 'Roses', 'price' => 5.0, 'taxable' => false]]) === '2 x Roses @ $5.00 = $10.00 (no tax)');
-check('due date with time', Orders::dueDateValue('2026-10-30', '14:30') === '2026-10-30 14:30:00');
+check('due time is sent to Infinity in UTC', Orders::dueDateValue('2026-10-30', '14:30', 'America/Denver') === '2026-10-30 20:30:00');
+check('due date without time stays a date', Orders::dueDateValue('2026-10-30', '', 'America/Denver') === '2026-10-30');
+check('due label shows shop time', Orders::dueLabel('2026-10-30T20:30:00.000000Z', 'America/Denver') === 'Fri, Oct 30, 2:30 PM');
+check('due label for a date with no time', Orders::dueLabel('2026-10-30T00:00:00.000000Z', 'America/Denver') === 'Fri, Oct 30');
 
 $store = new Store(sys_get_temp_dir() . '/fo-test-' . getmypid());
 $auth = new Auth(str_repeat('s', 32), [], $store);

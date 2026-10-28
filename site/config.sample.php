@@ -12,8 +12,7 @@ return [
         'orders' => '9VF3MFPmMZL',
     ],
 
-    // Long random text used to sign login cookies. Make one at
-    // with: php tools/hash-pin.php --secret
+    // Long random text used to sign login cookies. Make one with: php tools/hash-pin.php --secret
     'session_secret' => '',
 
     // Staff who can sign in. Make each "pin" with: php tools/hash-pin.php 1234

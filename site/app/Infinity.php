@@ -110,10 +110,26 @@ final class Infinity
         return $values;
     }
 
+    // Reference fields can't be set on create; Infinity wants them added
+    // afterwards through the references endpoint, one link per target item.
     public function createItem(string $board, array $fields): array
     {
+        $byName = $this->schema($board)['byName'];
+        $refs = [];
+        foreach ($fields as $name => $value) {
+            if (($byName[$name]['type'] ?? '') === 'reference') {
+                $refs[$byName[$name]['id']] = array_values(array_filter((array) $value));
+                unset($fields[$name]);
+            }
+        }
         $body = ['folder_id' => $this->schema($board)['folderId'], 'values' => $this->toValues($board, $fields)];
-        return $this->call('POST', "/boards/$board/items", $body);
+        $item = $this->call('POST', "/boards/$board/items", $body);
+        foreach ($refs as $attributeId => $targets) {
+            foreach ($targets as $to) {
+                $this->call('POST', "/boards/$board/references", ['attribute_id' => $attributeId, 'from_item_id' => $item['id'], 'to_item_id' => $to]);
+            }
+        }
+        return $item;
     }
 
     public function updateItem(string $board, string $itemId, array $fields): array

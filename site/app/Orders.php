@@ -84,12 +84,28 @@ final class Orders
     }
 
     // Infinity "date with time" value from the form's date and time inputs.
-    public static function dueDateValue(string $date, ?string $time): string
+    // Infinity stores times in UTC, so shop time is converted first.
+    public static function dueDateValue(string $date, ?string $time, string $tz = 'America/Denver'): string
     {
-        return $time ? "$date $time:00" : $date;
+        if (!$time) return $date;
+        return (new DateTimeImmutable("$date $time", new DateTimeZone($tz)))
+            ->setTimezone(new DateTimeZone('UTC'))
+            ->format('Y-m-d H:i:s');
     }
 
-    public static function orderFields(array $order, array $lines, array $totals, string $number, string $customerId, array $staff): array
+    // Shop-time label for a due date read back from Infinity, such as "Fri, Oct 30, 2:30 PM".
+    // Infinity returns UTC timestamps; a midnight-UTC value is a date with no time.
+    public static function dueLabel(?string $due, string $tz = 'America/Denver'): string
+    {
+        if (!$due) return '';
+        if (!preg_match('/^(\d{4}-\d{2}-\d{2})(?:[T ](\d{2}:\d{2}:\d{2}))?/', $due, $m)) return $due;
+        if (empty($m[2]) || $m[2] === '00:00:00') return (new DateTimeImmutable($m[1]))->format('D, M j');
+        return (new DateTimeImmutable("{$m[1]} {$m[2]}", new DateTimeZone('UTC')))
+            ->setTimezone(new DateTimeZone($tz))
+            ->format('D, M j, g:i A');
+    }
+
+    public static function orderFields(array $order, array $lines, array $totals, string $number, string $customerId, array $staff, string $tz = 'America/Denver'): array
     {
         $r = $order['recipient'] ?? [];
         $customerName = trim((string) ($order['customer']['name'] ?? ''));
@@ -107,7 +123,7 @@ final class Orders
             'Card Message' => trim((string) ($order['cardMessage'] ?? '')),
             'Occasion' => $order['occasion'] ?? null,
             'Fulfillment' => $order['fulfillment'],
-            'Due Date' => self::dueDateValue($order['dueDate'], $order['dueTime'] ?? null),
+            'Due Date' => self::dueDateValue($order['dueDate'], $order['dueTime'] ?? null, $tz),
             'Subtotal' => $totals['subtotal'],
             'Delivery Fee' => $totals['deliveryFee'],
             'Tax' => $totals['tax'],

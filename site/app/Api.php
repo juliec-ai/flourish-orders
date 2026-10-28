@@ -123,6 +123,7 @@ final class Api
                 'recipient' => $o['Recipient Name'] ?? '',
                 'address' => $o['Recipient Address'] ?? '',
                 'due' => $o['Due Date'] ?? '',
+                'dueLabel' => Orders::dueLabel($o['Due Date'] ?? null, $this->config['timezone']),
                 'fulfillment' => $o['Fulfillment'][0] ?? '',
                 'status' => $status,
                 'paymentStatus' => $o['Payment Status'][0] ?? '',
@@ -163,7 +164,7 @@ final class Api
             $this->store->forget('items-orders');
             $existing = array_map(fn($o) => $o['Order Number'] ?? null, $this->all('orders'));
             $number = Orders::nextOrderNumber($existing, Orders::datePrefix(null, $this->config['timezone']));
-            $created = $this->inf->createItem($this->boards['orders'], Orders::orderFields($order, $lines, $totals, $number, $customerId, $staff));
+            $created = $this->inf->createItem($this->boards['orders'], Orders::orderFields($order, $lines, $totals, $number, $customerId, $staff, $this->config['timezone']));
             $this->store->forget('items-orders');
             return ['id' => $created['id'], 'number' => $number, 'totals' => $totals];
         });

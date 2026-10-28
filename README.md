@@ -37,8 +37,8 @@ Payments: phase 1 records Payment Status and an optional Stripe payment ID. Char
 1. **Site Tools > Domain > Subdomains:** create `orders.brighamfloral.com`. SiteGround makes the folder `www/orders.brighamfloral.com/public_html`.
 2. **Security > SSL Manager:** add a free Let's Encrypt certificate for the subdomain, then turn on **HTTPS Enforce**.
 3. **Devs > PHP Manager:** set the subdomain to **Managed PHP** (8.2 or newer) so SiteGround keeps it patched.
-4. **Site Tools > File Manager:** in `www/orders.brighamfloral.com/`, upload the contents of `site/` so that `app/`, `config.sample.php` and `tools/` sit next to `public_html/`, and the files from `site/public_html/` (including the hidden `.htaccess`) are inside `public_html/`.
-5. Copy `config.sample.php` to `config.php` and fill in the Infinity token, a session secret, the staff list, and the tax rate. Make PIN hashes and the secret with `php tools/hash-pin.php 1234` and `php tools/hash-pin.php --secret` (SiteGround SSH), or ask Claude to prepare them.
+4. **Site Tools > File Manager:** open `www/orders.brighamfloral.com/`, upload the ready-made zip, and choose **Extract**. Afterwards that folder should hold `app/`, `config.php`, `public_html/` (with the hidden `.htaccess`) and `tools/`. Delete the zip once it's extracted.
+5. If you build it yourself instead: upload the contents of `site/`, copy `config.sample.php` to `config.php`, and fill in the Infinity token, a session secret, the staff list and the tax rate (0.069). Make PIN hashes and the secret with `php tools/hash-pin.php 123456` and `php tools/hash-pin.php --secret` over SiteGround SSH.
 6. Open `https://orders.brighamfloral.com` and sign in. Then add a top-tab link to it in Jadesites.
 
 Opening it in its own tab is the reliable choice. Embedding it inside a Jadesites page can break sign-in on iPads and Safari, which block cookies inside embeds.
