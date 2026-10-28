@@ -4,8 +4,9 @@ Options -Indexes
 RewriteEngine On
 RewriteRule ^api(/.*)?$ api.php [L,QSA]
 
-# Hide dotfiles
+# Hide dotfiles and SiteGround's PHP error log
 RewriteRule (^|/)\. - [F]
+RewriteRule (^|/)php_errorlog$ - [F]
 
 <IfModule mod_headers.c>
   Header always set X-Content-Type-Options "nosniff"
