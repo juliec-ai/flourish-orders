@@ -69,6 +69,16 @@ details summary { cursor: pointer; color: var(--green-2); margin: .25rem 0 .6rem
 .order pre { margin: .25rem 0 0; font: inherit; white-space: pre-wrap; font-size: .9rem; }
 .order .side { text-align: right; min-width: 170px; }
 .order .side select { margin: 0 0 .4rem; }
+.go-tag { display: inline-block; font-size: .75rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: .15rem .6rem; border-radius: 6px; margin-bottom: .35rem; background: var(--muted); color: #fff; }
+.order.go-delivery { border-left-color: var(--green); }
+.order.go-delivery .go-tag { background: var(--green); }
+.order.go-pickup { border-left-color: var(--gold); }
+.order.go-pickup .go-tag { background: var(--gold); }
+.order.go-walk-in { border-left-color: #5f6b73; }
+.order.go-walk-in .go-tag { background: #5f6b73; }
+.chips { display: flex; gap: .4rem; flex-wrap: wrap; margin-top: .75rem; }
+.chip { margin: 0; padding: .3rem .8rem; border-radius: 999px; border-color: var(--line); font-size: .9rem; }
+.chip.on { background: var(--green); color: #fff; border-color: var(--green); }
 .pill { display: inline-block; font-size: .75rem; padding: .1rem .5rem; border-radius: 999px; background: var(--cream); border: 1px solid var(--line); margin-right: .25rem; }
 .pill.unpaid { border-color: var(--error); color: var(--error); }
 @media (max-width: 560px) { .order { grid-template-columns: 1fr; } .order .side { text-align: left; } }

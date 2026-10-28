@@ -247,6 +247,19 @@
   });
 
   // ---------- order list ----------
+  const fulfillClass = (f) => `go-${String(f || 'none').toLowerCase().replace(/[^a-z]+/g, '-')}`;
+
+  // Going-out-by filter chips above the list.
+  let goFilter = '';
+  function renderFilter() {
+    const opts = ['', ...(state.options?.fulfillment || [])];
+    $('#go-filter').innerHTML = opts.map((f) => `<button type="button" class="chip ${f === goFilter ? 'on' : ''}" data-f="${esc(f)}">${esc(f || 'All')}</button>`).join('');
+    $$('#go-filter .chip').forEach((b) => b.addEventListener('click', () => { goFilter = b.dataset.f; renderFilter(); applyFilter(); }));
+  }
+  function applyFilter() {
+    $$('#orders .order').forEach((el) => { el.hidden = goFilter !== '' && el.dataset.fulfillment !== goFilter; });
+  }
+
   async function loadOrders() {
     const box = $('#orders');
     box.innerHTML = '<p class="muted">Loading...</p>';
@@ -254,10 +267,11 @@
       const list = await api(`/orders${$('#show-done').checked ? '?done=1' : ''}`);
       if (!list.length) { box.innerHTML = '<p class="muted">No open orders.</p>'; return; }
       box.innerHTML = list.map((o) => `
-        <article class="order" data-id="${esc(o.id)}">
+        <article class="order ${fulfillClass(o.fulfillment)}" data-id="${esc(o.id)}" data-fulfillment="${esc(o.fulfillment)}">
           <div>
+            <span class="go-tag">${esc(o.fulfillment || 'Not set')}</span>
             <h3>${esc(o.name || o.number)}</h3>
-            <div class="muted">${esc(o.dueLabel || 'No due date')} · ${esc(o.fulfillment)}${o.address ? ` · ${esc(o.address)}` : ''}</div>
+            <div class="muted">${esc(o.dueLabel || 'No due date')}${o.address ? ` · ${esc(o.address)}` : ''}</div>
             <div><span class="pill">${esc(o.brand)}</span><span class="pill ${o.paymentStatus === 'Unpaid' ? 'unpaid' : ''}">${esc(o.paymentStatus)}</span></div>
             <pre>${esc(o.lineItems)}</pre>
             ${o.cardMessage ? `<div class="muted">Card: “${esc(o.cardMessage)}”</div>` : ''}
@@ -268,6 +282,8 @@
             <strong>${fmt(o.total)}</strong>
           </div>
         </article>`).join('');
+      renderFilter();
+      applyFilter();
       $$('#orders select').forEach((sel) => sel.addEventListener('change', async () => {
         const id = sel.closest('.order').dataset.id;
         try {
