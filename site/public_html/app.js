@@ -260,30 +260,67 @@
     $$('#orders .order').forEach((el) => { el.hidden = goFilter !== '' && el.dataset.fulfillment !== goFilter; });
   }
 
-  // Work ticket for the designer and driver, printed on plain letter paper.
+  // One 8.5x11 sheet, like the HANA ticket: a three-panel enclosure card across the top
+  // (recipient, shop info, card message), then the work ticket and the delivery ticket.
   function printTicket(o) {
+    const shop = state.options.shop || {};
+    const brand = o.brand || state.options.defaultBrand || '';
+    const delivery = o.fulfillment === 'Delivery';
+    const notes = String(o.notes || '').split('\n').filter((l) => !/^Taken by:/.test(l)).join('\n');
+    const takenBy = (String(o.notes || '').match(/^Taken by: (.*)$/m) || [])[1] || '';
+    const msg = o.cardMessage || '';
+    const msgSize = msg.length > 220 ? 'sm' : msg.length > 110 ? 'md' : 'lg';
+    const addr = (lines) => lines.filter(Boolean).map((l) => `<div>${esc(l)}</div>`).join('');
     const row = (label, value) => (value ? `<tr><th>${label}</th><td>${esc(value)}</td></tr>` : '');
     $('#print-area').innerHTML = `
-      <div class="ticket">
-        <header>
-          <div><div class="t-go">${esc(o.fulfillment || '')}</div><h1>Order ${esc(o.number)}</h1></div>
-          <div class="t-due"><div>Due</div><strong>${esc(o.dueLabel || 'No due date')}</strong></div>
-        </header>
-        <table>
-          ${row('Customer', [o.customerName, o.customerPhone].filter(Boolean).join(' · '))}
-          ${row('Recipient', [o.recipient, o.recipientPhone].filter(Boolean).join(' · '))}
-          ${row('Deliver to', o.fulfillment === 'Delivery' ? o.address : '')}
-          ${row('Occasion', o.occasion)}
-          ${row('Brand', o.brand)}
-          ${row('Came in by', o.channel)}
-          ${row('Payment', `${o.paymentStatus} · ${fmt(o.total)}`)}
-        </table>
-        <h2>Items</h2>
-        <pre>${esc(o.lineItems)}</pre>
-        ${o.notes ? `<h2>Notes</h2><pre>${esc(o.notes)}</pre>` : ''}
-        <h2>Card message</h2>
-        <div class="t-card">${esc(o.cardMessage) || '<em>No card message</em>'}</div>
-        <div class="t-sign"><span>Designed by ________</span><span>Checked ________</span>${o.fulfillment === 'Delivery' ? '<span>Delivered ________</span>' : '<span>Picked up ________</span>'}</div>
+      <div class="sheet">
+        <section class="card-strip">
+          <div class="panel p-to">
+            <div class="p-brand">${esc(brand)}</div>
+            ${addr([o.recipient, delivery ? o.address : '', o.recipientPhone ? `Phone: ${o.recipientPhone}` : ''])}
+            <div class="p-when">${delivery ? 'Delivery' : esc(o.fulfillment || 'Due')}: <strong>${esc(o.dueLabel || '')}</strong></div>
+          </div>
+          <div class="panel p-shop">
+            <div class="p-brand">${esc(brand)}</div>
+            ${addr([shop.address, shop.phone ? `Phone: ${shop.phone}` : '', shop.email, shop.web])}
+            <p class="p-care">Dear Valued Customer,<br>${esc(shop.care || '')}</p>
+          </div>
+          <div class="panel p-msg">
+            <div class="p-brand">${esc(brand)}</div>
+            <div class="p-text ${msgSize}">${esc(msg)}</div>
+          </div>
+        </section>
+
+        <section class="tickets">
+          <div class="work">
+            <div class="w-head"><strong>${esc(o.fulfillment || '')} · ${esc(o.dueLabel || 'No due date')}</strong><strong>#${esc(o.number)}</strong></div>
+            <div class="w-cols">
+              <div><h4>Recipient</h4>${addr([o.recipient, o.address, o.recipientPhone])}</div>
+              <div><h4>Sender</h4>${addr([o.customerName, o.customerPhone])}</div>
+              <div class="w-meta">${addr([o.channel ? `Came in by: ${o.channel}` : '', o.occasion ? `Occasion: ${o.occasion}` : '', takenBy ? `Taken by: ${takenBy}` : '', brand])}</div>
+            </div>
+            <h4>Items</h4>
+            <pre>${esc(o.lineItems)}</pre>
+            ${notes ? `<h4>Special instructions</h4><pre>${esc(notes)}</pre>` : ''}
+            <table class="w-totals">
+              ${row('Subtotal', fmt(o.subtotal))}
+              ${o.deliveryFee ? row('Delivery fee', fmt(o.deliveryFee)) : ''}
+              ${row('Tax', fmt(o.tax))}
+              <tr class="tot"><th>Total</th><td>${fmt(o.total)}</td></tr>
+              ${row('Payment', o.paymentStatus)}
+            </table>
+            <div class="w-sign"><span>Designed by ____________</span><span>Checked ____________</span></div>
+          </div>
+          <div class="deliv">
+            <div class="d-title">${delivery ? 'DELIVERY TICKET' : 'PICKUP TICKET'} <span>#${esc(o.number)}</span></div>
+            <div class="d-when"><strong>${esc(o.dueLabel || '')}</strong></div>
+            ${addr([o.recipient, delivery ? o.address : '', o.recipientPhone ? `Phone: ${o.recipientPhone}` : ''])}
+            ${o.occasion ? `<div class="d-gap">Occasion: ${esc(o.occasion)}</div>` : ''}
+            ${notes ? `<div class="d-gap">${esc(notes)}</div>` : ''}
+            <h4>Product</h4><pre>${esc(o.lineItems.replace(/ @ .*$/gm, ''))}</pre>
+            <div class="d-sign"><div>Print name: ________________</div><div>Time: ________________</div></div>
+          </div>
+        </section>
       </div>`;
     window.print();
   }
@@ -308,7 +345,7 @@
             <select data-k="status" aria-label="Status">${state.options.status.map((s) => `<option ${s === o.status ? 'selected' : ''}>${esc(s)}</option>`).join('')}</select>
             <select data-k="paymentStatus" aria-label="Payment">${state.options.paymentStatus.map((s) => `<option ${s === o.paymentStatus ? 'selected' : ''}>${esc(s)}</option>`).join('')}</select>
             <strong>${fmt(o.total)}</strong>
-            <button type="button" class="print-btn">Print ticket</button>
+            <button type="button" class="print-btn">Print</button>
           </div>
         </article>`).join('');
       renderFilter();

@@ -5,6 +5,15 @@ final class Api
     private const CHANNEL_TO_SOURCE = ['Counter' => 'Walk-in', 'Phone' => 'Phone', 'Website' => 'Website', 'FSN Network' => 'FSN Network'];
     private const DONE = ['Picked Up', 'Delivered', 'Cancelled'];
 
+    // Shop details printed on the enclosure card. config.php can override any of these with a 'shop' array.
+    private const SHOP = [
+        'address' => '437 South Main Street, Brigham City UT 84302',
+        'phone' => '435-723-3449',
+        'email' => 'support@brighamfloral.com',
+        'web' => 'brighamfloral.com',
+        'care' => 'To ensure freshness, flowers may arrive in bud form, ready to bloom into full beauty in a few days. For full enjoyment of your bouquet, please remember to re-cut stems and place flowers in fresh water.',
+    ];
+
     private array $boards;
 
     public function __construct(private array $config, private Infinity $inf, private Auth $auth, private Store $store)
@@ -63,6 +72,7 @@ final class Api
             'taxRate' => (float) $this->config['tax_rate'],
             'deliveryFee' => (float) $this->config['delivery_fee'],
             'defaultBrand' => $this->config['default_brand'],
+            'shop' => ($this->config['shop'] ?? []) + self::SHOP,
         ];
     }
 
