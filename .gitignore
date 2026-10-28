@@ -1,3 +1,4 @@
 site/config.php
 site/data/
 *.log
+*.png
