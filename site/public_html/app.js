@@ -260,7 +260,7 @@
     $$('#orders .order').forEach((el) => { el.hidden = goFilter !== '' && el.dataset.fulfillment !== goFilter; });
   }
 
-  // One portrait 8.5x11 sheet on perforated paper. Above the perforation is the card that goes
+  // One landscape 11x8.5 sheet on perforated paper. Above the perforation is the card that goes
   // with the arrangement (landscape half: logo and recipient on the left, message on the right,
   // care note along the bottom). Below it is the shop's copy: work ticket and delivery sign-off.
   function printTicket(o) {
@@ -280,7 +280,7 @@
       : esc(brand);
     const contact = [shop.phone, shop.web].filter(Boolean).join(' · ');
     $('#print-area').innerHTML = `
-      <div class="sheet" style="--card-h: ${Number(shop.perf_inches) || 5.5}in">
+      <div class="sheet" style="--card-h: ${Number(shop.perf_inches) || 4.25}in">
         <section class="gift-card">
           <div class="c-left">
             <div class="c-logo">${logo}</div>
@@ -316,6 +316,8 @@
             <div>
               <h4>Recipient</h4>${addr([o.recipient, o.address, o.recipientPhone])}
               <h4>Sender</h4>${addr([o.customerName, o.customerPhone]) || '<div>—</div>'}
+            </div>
+            <div>
               <div class="s-meta">${addr([o.channel ? `Came in by: ${o.channel}` : '', o.occasion ? `Occasion: ${o.occasion}` : '', takenBy ? `Taken by: ${takenBy}` : '', brand])}</div>
               <div class="s-sign">
                 <div>Designed by ______________</div>

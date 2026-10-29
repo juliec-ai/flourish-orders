@@ -11,8 +11,8 @@ final class Api
         'phone' => '435-723-3449',
         'email' => 'support@brighamfloral.com',
         'web' => 'brighamfloral.com',
-        // Where the perforation is on the printed sheet, in inches from the top. The card prints above it.
-        'perf_inches' => 5.5,
+        // Where the perforation is on the landscape sheet, in inches from the top. The card prints above it.
+        'perf_inches' => 4.25,
         'care' => 'To ensure freshness, flowers may arrive in bud form, ready to bloom into full beauty in a few days. For full enjoyment of your bouquet, please remember to re-cut stems and place flowers in fresh water.',
     ];
 

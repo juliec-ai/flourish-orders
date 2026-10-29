@@ -93,18 +93,18 @@ details summary { cursor: pointer; color: var(--green-2); margin: .25rem 0 .6rem
 .print-btn { display: block; width: 100%; margin: .5rem 0 0; font-size: .9rem; }
 .print-area { display: none; }
 @media print {
-  @page { size: letter portrait; margin: 0; }
+  @page { size: letter landscape; margin: 0; }
   body { background: #fff; margin: 0; }
   body > *:not(.print-area) { display: none !important; }
   .print-area { display: block; color: #000; font: 9.5pt/1.3 Arial, Helvetica, sans-serif; }
   .print-area pre { font: inherit; white-space: pre-wrap; margin: 0; }
-  .sheet { width: 8.5in; height: 11in; overflow: hidden; }
+  .sheet { width: 11in; height: 8.5in; overflow: hidden; }
 
   /* The card: everything above the perforation (--card-h, set from the shop's perf_inches). */
-  .gift-card { height: var(--card-h); box-sizing: border-box; padding: .4in .4in .3in; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 100%; gap: .5in; }
+  .gift-card { height: var(--card-h); box-sizing: border-box; padding: .3in .5in .25in; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 100%; gap: .5in; }
   .c-left { display: flex; flex-direction: column; text-align: center; }
   .c-logo { font-family: Georgia, "Times New Roman", serif; font-size: 18pt; }
-  .c-logo img { max-width: 2.6in; max-height: 1.4in; object-fit: contain; }
+  .c-logo img { max-width: 2.6in; max-height: 1.15in; object-fit: contain; }
   .c-to { margin: auto 0; font-size: 12pt; line-height: 1.4; }
   .c-when { margin-top: 6pt; font-size: 10.5pt; }
   .c-shop { font-size: 8pt; color: #333; }
@@ -114,15 +114,15 @@ details summary { cursor: pointer; color: var(--green-2); margin: .25rem 0 .6rem
   .c-care { font-size: 7.5pt; text-align: center; color: #333; border-top: .5pt solid #999; padding-top: 4pt; }
 
   /* The shop's copy below the perforation. */
-  .shop-copy { height: calc(11in - var(--card-h)); box-sizing: border-box; padding: .35in .4in .3in; }
+  .shop-copy { height: calc(8.5in - var(--card-h)); box-sizing: border-box; padding: .3in .5in .25in; }
   .shop-copy h4 { margin: 7pt 0 1pt; font-size: 8.5pt; text-transform: uppercase; letter-spacing: .04em; }
   .s-head { display: flex; justify-content: space-between; font-size: 12pt; border-bottom: 1.5pt solid #000; padding-bottom: 3pt; }
-  .s-cols { display: grid; grid-template-columns: 1.3fr 1fr; gap: .35in; }
+  .s-cols { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: .35in; }
   .s-card { font-style: italic; }
   .s-totals { margin-top: 8pt; border-collapse: collapse; min-width: 2.2in; }
   .s-totals th { text-align: left; font-weight: 400; padding: 1pt 14pt 1pt 0; }
   .s-totals td { text-align: right; }
   .s-totals .tot th, .s-totals .tot td { font-weight: 700; border-top: 1pt solid #000; padding-top: 2pt; }
   .s-meta { margin-top: 8pt; font-size: 8.5pt; }
-  .s-sign { margin-top: 14pt; display: grid; gap: 14pt; }
+  .s-sign { margin-top: 8pt; display: grid; gap: 14pt; }
 }
