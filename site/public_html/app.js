@@ -260,8 +260,9 @@
     $$('#orders .order').forEach((el) => { el.hidden = goFilter !== '' && el.dataset.fulfillment !== goFilter; });
   }
 
-  // One 8.5x11 sheet, like the HANA ticket: a three-panel enclosure card across the top
-  // (recipient, shop info, card message), then the work ticket and the delivery ticket.
+  // One portrait 8.5x11 sheet on perforated paper. Above the perforation is the card that goes
+  // with the arrangement (landscape half: logo and recipient on the left, message on the right,
+  // care note along the bottom). Below it is the shop's copy: work ticket and delivery sign-off.
   function printTicket(o) {
     const shop = state.options.shop || {};
     const brand = o.brand || state.options.defaultBrand || '';
@@ -269,65 +270,63 @@
     const notes = String(o.notes || '').split('\n').filter((l) => !/^Taken by:/.test(l)).join('\n');
     const takenBy = (String(o.notes || '').match(/^Taken by: (.*)$/m) || [])[1] || '';
     const msg = o.cardMessage || '';
-    const msgSize = msg.length > 220 ? 'sm' : msg.length > 110 ? 'md' : 'lg';
-    // Logo files live in public_html/logos, one per brand; the brand name prints if a logo is missing.
-    const logoFile = { 'Brigham Floral and Gift': 'brigham-floral', Flourish: 'flourish', 'David Isaac': 'david-isaac' }[brand];
-    const logo = () => (logoFile
-      ? `<div class="p-brand"><img src="/logos/${logoFile}.png" alt="${esc(brand)}" onerror="this.replaceWith(document.createTextNode(this.alt))"></div>`
-      : `<div class="p-brand">${esc(brand)}</div>`);
+    const msgSize = msg.length > 260 ? 'sm' : msg.length > 130 ? 'md' : 'lg';
     const addr = (lines) => lines.filter(Boolean).map((l) => `<div>${esc(l)}</div>`).join('');
     const row = (label, value) => (value ? `<tr><th>${label}</th><td>${esc(value)}</td></tr>` : '');
+    // Logo files live in public_html/logos, one per brand; the brand name prints if a logo is missing.
+    const logoFile = { 'Brigham Floral and Gift': 'brigham-floral', Flourish: 'flourish', 'David Isaac': 'david-isaac' }[brand];
+    const logo = logoFile
+      ? `<img src="/logos/${logoFile}.png" alt="${esc(brand)}" onerror="this.replaceWith(document.createTextNode(this.alt))">`
+      : esc(brand);
+    const contact = [shop.phone, shop.web].filter(Boolean).join(' · ');
     $('#print-area').innerHTML = `
-      <div class="sheet">
-        <section class="card-strip">
-          <div class="panel p-to">
-            ${logo()}
-            ${addr([o.recipient, delivery ? o.address : '', o.recipientPhone ? `Phone: ${o.recipientPhone}` : ''])}
-            <div class="p-when">${delivery ? 'Delivery' : esc(o.fulfillment || 'Due')}: <strong>${esc(o.dueLabel || '')}</strong></div>
+      <div class="sheet" style="--card-h: ${Number(shop.perf_inches) || 5.5}in">
+        <section class="gift-card">
+          <div class="c-left">
+            <div class="c-logo">${logo}</div>
+            <div class="c-to">
+              ${addr([o.recipient, delivery ? o.address : '', o.recipientPhone])}
+              <div class="c-when">${esc(delivery ? 'Delivery' : o.fulfillment || 'Due')}: <strong>${esc(o.dueLabel || '')}</strong></div>
+            </div>
+            <div class="c-shop">${addr([shop.address, contact])}</div>
           </div>
-          <div class="panel p-shop">
-            ${logo()}
-            ${addr([shop.address, shop.phone ? `Phone: ${shop.phone}` : '', shop.email, shop.web])}
-            <p class="p-care">Dear Valued Customer,<br>${esc(shop.care || '')}</p>
-          </div>
-          <div class="panel p-msg">
-            ${logo()}
-            <div class="p-text ${msgSize}">${esc(msg)}</div>
+          <div class="c-right">
+            <div class="c-msg ${msgSize}">${esc(msg)}</div>
+            <div class="c-care">${esc(shop.care || '')}</div>
           </div>
         </section>
 
-        <section class="tickets">
-          <div class="work">
-            <div class="w-head"><strong>${esc(o.fulfillment || '')} · ${esc(o.dueLabel || 'No due date')}</strong><strong>#${esc(o.number)}</strong></div>
-            <div class="w-cols">
-              <div><h4>Recipient</h4>${addr([o.recipient, o.address, o.recipientPhone])}</div>
-              <div><h4>Sender</h4>${addr([o.customerName, o.customerPhone])}</div>
-              <div class="w-meta">${addr([o.channel ? `Came in by: ${o.channel}` : '', o.occasion ? `Occasion: ${o.occasion}` : '', takenBy ? `Taken by: ${takenBy}` : '', brand])}</div>
+        <section class="shop-copy">
+          <div class="s-head"><strong>${esc(o.fulfillment || '')} · ${esc(o.dueLabel || 'No due date')}</strong><strong>#${esc(o.number)}</strong></div>
+          <div class="s-cols">
+            <div>
+              <h4>Items</h4>
+              <pre>${esc(o.lineItems)}</pre>
+              ${notes ? `<h4>Special instructions</h4><pre>${esc(notes)}</pre>` : ''}
+              <h4>Card</h4>
+              <pre class="s-card">${esc(msg) || '(no card message)'}</pre>
+              <table class="s-totals">
+                ${row('Subtotal', fmt(o.subtotal))}
+                ${o.deliveryFee ? row('Delivery fee', fmt(o.deliveryFee)) : ''}
+                ${row('Tax', fmt(o.tax))}
+                <tr class="tot"><th>Total</th><td>${fmt(o.total)}</td></tr>
+                ${row('Payment', o.paymentStatus)}
+              </table>
             </div>
-            <h4>Items</h4>
-            <pre>${esc(o.lineItems)}</pre>
-            ${notes ? `<h4>Special instructions</h4><pre>${esc(notes)}</pre>` : ''}
-            <table class="w-totals">
-              ${row('Subtotal', fmt(o.subtotal))}
-              ${o.deliveryFee ? row('Delivery fee', fmt(o.deliveryFee)) : ''}
-              ${row('Tax', fmt(o.tax))}
-              <tr class="tot"><th>Total</th><td>${fmt(o.total)}</td></tr>
-              ${row('Payment', o.paymentStatus)}
-            </table>
-            <div class="w-sign"><span>Designed by ____________</span><span>Checked ____________</span></div>
-          </div>
-          <div class="deliv">
-            <div class="d-title">${delivery ? 'DELIVERY TICKET' : 'PICKUP TICKET'} <span>#${esc(o.number)}</span></div>
-            <div class="d-when"><strong>${esc(o.dueLabel || '')}</strong></div>
-            ${addr([o.recipient, delivery ? o.address : '', o.recipientPhone ? `Phone: ${o.recipientPhone}` : ''])}
-            ${o.occasion ? `<div class="d-gap">Occasion: ${esc(o.occasion)}</div>` : ''}
-            ${notes ? `<div class="d-gap">${esc(notes)}</div>` : ''}
-            <h4>Product</h4><pre>${esc(o.lineItems.replace(/ @ .*$/gm, ''))}</pre>
-            <div class="d-sign"><div>Print name: ________________</div><div>Time: ________________</div></div>
+            <div>
+              <h4>Recipient</h4>${addr([o.recipient, o.address, o.recipientPhone])}
+              <h4>Sender</h4>${addr([o.customerName, o.customerPhone]) || '<div>—</div>'}
+              <div class="s-meta">${addr([o.channel ? `Came in by: ${o.channel}` : '', o.occasion ? `Occasion: ${o.occasion}` : '', takenBy ? `Taken by: ${takenBy}` : '', brand])}</div>
+              <div class="s-sign">
+                <div>Designed by ______________</div>
+                <div>${delivery ? 'Delivered by' : 'Picked up by'} ______________</div>
+                <div>Date / time ______________</div>
+              </div>
+            </div>
           </div>
         </section>
       </div>`;
-    // Print once the logos have loaded (or failed), so they aren't left blank.
+    // Print once the logo has loaded (or failed), so it isn't left blank.
     const imgs = $$('#print-area img');
     Promise.all(imgs.map((i) => (i.complete ? null : new Promise((r) => { i.onload = r; i.addEventListener('error', r); }))))
       .then(() => window.print());
